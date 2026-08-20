@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Bayesian reanalysis engine (sarcoid + IPF parity). Two-level design:
+"""Bayesian analysis engine (sarcoid + IPF parity). Two-level design:
 exposure = tau^2-marginalized Bayesian RE (4-prior sweep); overall = Bayesian multilevel
 (exposure + study random intercepts). Frequentist DL/REML + CHE(CR2+Satterthwaite) as sensitivity.
 Effect scale log-OR; SE=(lnUCL-lnLCL)/(2z), z=1.959964. numpy only."""
