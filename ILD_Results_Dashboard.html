@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ILD Umbrella Review — Results Dashboard</title>
+<style>
+:root{
+ --navy:#0E4C5A; --ink:#0E3540; --steel:#2E8B9E; --green:#2F8F6B; --amber:#E0A93B;
+ --orange:#E07A5F; --red:#C0553B; --mute:#5F6E72; --panel:#EAF2F3; --ice:#CFE4E7;
+ --line:#D2DEE0; --bg:#F7FAFB; --card:#FFFFFF;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+ color:var(--ink);background:var(--bg);font-size:14px;line-height:1.45}
+header{background:linear-gradient(135deg,var(--navy),var(--steel));color:#fff;padding:22px 26px}
+header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px}
+header p{margin:5px 0 0;font-size:12.5px;opacity:.9}
+nav{display:flex;flex-wrap:wrap;gap:2px;background:var(--ink);padding:0 12px}
+nav button{background:transparent;border:0;color:#cfe4e7;padding:12px 15px;font-size:13px;
+ cursor:pointer;border-bottom:3px solid transparent;font-weight:600}
+nav button:hover{color:#fff}
+nav button.active{color:#fff;border-bottom-color:var(--amber)}
+main{max-width:1180px;margin:0 auto;padding:22px}
+.panel{display:none} .panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:18px;
+ box-shadow:0 1px 2px rgba(14,76,90,.04)}
+h2{font-size:16px;color:var(--navy);margin:0 0 4px} h3{font-size:13.5px;color:var(--navy);margin:16px 0 8px}
+.sub{color:var(--mute);font-size:12.5px;margin:0 0 12px}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:14px}
+.controls label{font-size:12.5px;color:var(--mute);font-weight:600}
+select,.seg button{font-size:12.5px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{background:#fff;border:0;padding:6px 12px;cursor:pointer;color:var(--mute);font-weight:600}
+.seg button.on{background:var(--steel);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:center}
+th{background:var(--panel);color:var(--navy);font-weight:700;position:sticky;top:0}
+td.l,th.l{text-align:left}
+.tier{display:inline-block;padding:2px 9px;border-radius:11px;color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--mute);margin-top:10px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.sq{width:13px;height:13px;border-radius:3px;display:inline-block}
+.kpis{display:flex;flex-wrap:wrap;gap:14px}
+.kpi{flex:1;min-width:150px;background:var(--panel);border-radius:9px;padding:13px 15px;border:1px solid var(--line)}
+.kpi .v{font-size:22px;font-weight:800;color:var(--navy)} .kpi .k{font-size:11.5px;color:var(--mute);font-weight:600}
+.kpi .c{font-size:11.5px;color:var(--mute);margin-top:2px}
+.note{font-size:11.5px;color:var(--mute);margin-top:8px}
+.tl{border-collapse:separate;border-spacing:3px}
+.tl td{border:0;padding:0} .tl .cell{width:26px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.tl .rowlab{text-align:left;font-size:12px;font-weight:600;padding-right:8px;white-space:nowrap}
+.tl .rowsub{color:var(--mute);font-weight:400;font-size:10.5px}
+.tl th{background:transparent;color:var(--navy);font-size:10.5px;font-weight:700;padding:2px}
+.hm td.v{color:#fff;font-weight:700;width:40px;height:34px;border:1px solid #fff;font-size:11.5px}
+.hm td.rl{text-align:right;font-weight:600;font-size:11.5px;color:var(--navy);padding-right:8px;white-space:nowrap}
+.hm th{background:transparent;font-size:11px;color:var(--navy);transform:translateY(0)}
+.flex2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.flex2{grid-template-columns:1fr}}
+svg text{font-family:inherit}
+.footer{color:var(--mute);font-size:11px;text-align:center;padding:16px}
+.pill{background:var(--ice);color:var(--navy);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;display:inline-block}
+</style>
+</head>
+<body>
+<header>
+ <h1>From Civilian Exposures to Military Risk — Umbrella Review Results Dashboard</h1>
+ <p>Airborne hazards and interstitial lung disease · IPF and pulmonary sarcoidosis · two-level Bayesian synthesis (τ²-marginalized pools + multilevel overall), DL/REML references, CHE dependency cross-check · all values reproduced by re-running <code>bayes_multilevel.py</code> and confirmed in PyMC (NUTS) / metafor</p>
+</header>
+<nav id="nav"></nav>
+<main>
+ <!-- POOLS -->
+ <section class="panel active" data-p="pools">
+  <div class="card">
+   <h2>Exposure-specific pooled odds ratios</h2>
+   <p class="sub">Bayesian random-effects pools with 95% credible intervals; DerSimonian–Laird (DL) and REML shown as references. Robustness tier read from the posterior, not a single p-value.</p>
+   <div class="controls">
+    <label>Disease</label>
+    <div class="seg" id="segDis">
+     <button class="on" data-v="all">Both</button><button data-v="IPF">IPF</button><button data-v="Sarcoid">Sarcoidosis</button>
+    </div>
+    <label>Minimum tier</label>
+    <select id="selTier">
+     <option value="0">All</option><option value="1">Fragile+</option><option value="2">Borderline+</option><option value="3">Robust only</option>
+    </select>
+    <label><input type="checkbox" id="chkRef" checked> show DL / REML markers</label>
+   </div>
+   <div id="forest"></div>
+   <div class="legend">
+    <span><span class="dot" style="background:var(--green)"></span>Robust</span>
+    <span><span class="dot" style="background:#6FB07D"></span>Borderline</span>
+    <span><span class="dot" style="background:var(--amber)"></span>Fragile</span>
+    <span><span class="dot" style="background:var(--red)"></span>Weak</span>
+    <span><span class="dot" style="background:#9AA5A8"></span>Null</span>
+    <span>◆ DL &nbsp; ▲ REML &nbsp;|&nbsp; dashed line = null (OR 1)</span>
+   </div>
+  </div>
+  <div class="card">
+   <h3>Pool detail</h3>
+   <div style="overflow:auto"><table id="poolTbl"></table></div>
+  </div>
+ </section>
+
+ <!-- OVERALL -->
+ <section class="panel" data-p="overall">
+  <div class="card">
+   <h2>Cross-exposure overall estimates &amp; CHE dependency cross-check</h2>
+   <p class="sub">Multilevel model with study-level random intercepts absorbing shared-study dependence; CHE = correlated-and-hierarchical-effects with CR2 cluster-robust variance and Satterthwaite df (within-study r = 0.4–0.8).</p>
+   <div class="kpis" id="kpiOverall"></div>
+   <h3>Overall forest</h3>
+   <div id="forestOverall"></div>
+   <p class="note">IPF resolves away from the null on both the Bayesian multilevel and the dependency-robust CHE estimate. Sarcoidosis reaches significance on the full consolidated set (n = 14) but crosses the null on the core Huntley pools (n = 10) — a difference of resolvability, disclosed in Supplement S3.</p>
+  </div>
+ </section>
+
+ <!-- ROB -->
+ <section class="panel" data-p="rob">
+  <div class="card">
+   <h2>Risk of bias — AMSTAR 2 (secondary reviews)</h2>
+   <p class="sub">Seven critical domains drive the overall confidence rating. Applied only to the included reviews; primary studies use adapted OHAT (below).</p>
+   <div id="amstar"></div>
+   <div class="legend">
+    <span><span class="sq" style="background:var(--green)"></span>Yes</span>
+    <span><span class="sq" style="background:var(--amber)"></span>Partial</span>
+    <span><span class="sq" style="background:var(--red)"></span>No</span>
+    <span><span class="sq" style="background:#B7C0C2"></span>N/A</span>
+    <span class="pill">Moderate 1 · Low 4 · Critically Low 6 · High 0</span>
+   </div>
+  </div>
+  <div class="card">
+   <h2>Risk of bias — adapted OHAT (primary studies)</h2>
+   <p class="sub">Signaling domains D1–D10; D2 (exposure misclassification), D4 (outcome/diagnosis confidence), D6 (confounding) are critical. Overall = Greater-than-low if any critical domain is probably/definitely high. Sarcoid ratings are drafts pending dual-reviewer confirmation.</p>
+   <div class="controls">
+    <label>Disease</label>
+    <div class="seg" id="segOh">
+     <button class="on" data-v="all">Both</button><button data-v="IPF">IPF (23)</button><button data-v="Sarcoid">Sarcoid (10)</button>
+    </div>
+   </div>
+   <div id="ohat" style="overflow:auto"></div>
+   <div class="legend">
+    <span><span class="sq" style="background:#1B7837"></span>Definitely low</span>
+    <span><span class="sq" style="background:#A6D96A"></span>Probably low</span>
+    <span><span class="sq" style="background:#F2A65A"></span>Probably high</span>
+    <span><span class="sq" style="background:#C0392B"></span>Definitely high</span>
+    <span><span class="sq" style="background:#BDBDBD"></span>No info</span>
+   </div>
+  </div>
+ </section>
+
+ <!-- XVAL -->
+ <section class="panel" data-p="xval">
+  <div class="card">
+   <h2>Cross-validation — engine vs. external Bayesian package</h2>
+   <p class="sub">Each pool re-fit in PyMC (NUTS) — a non-centered hierarchical RE model, the Stan/brms-class comparator. DL reproduced exactly in metafor. |Δ OR| ≤ 0.02; R̂ ≤ 1.009.</p>
+   <div style="overflow:auto"><table id="xvalTbl"></table></div>
+   <div id="xvalBars" style="margin-top:14px"></div>
+   <p class="note">The custom sampler is not driving the estimates: an independent NUTS engine reproduces every posterior within Monte-Carlo error. The only correction surfaced was six mis-reported REML values (now fixed; ✎).</p>
+  </div>
+ </section>
+
+ <!-- CORR -->
+ <section class="panel" data-p="corr">
+  <div class="card">
+   <h2>Shared-study dependency (correlation) matrices</h2>
+   <p class="sub">Off-diagonal = number of primary studies contributing to <em>both</em> exposure families — the correlation the CHE model corrects for. Diagonal = studies in that family (k). Darker = more shared studies.</p>
+   <div class="flex2">
+    <div><h3>IPF — exposure × exposure shared studies</h3><div id="corrIPF" style="overflow:auto"></div></div>
+    <div><h3>Sarcoidosis — exposure × exposure shared studies</h3><div id="corrSar" style="overflow:auto"></div></div>
+   </div>
+   <p class="note">IPF shows heavy overlap (e.g., Metal dust shares 11 studies with Wood dust, 9 with Silica); Air pollution is fully independent (0 shared). This overlap is why the overall uses a study-level random intercept plus the CHE/CR2 sensitivity rather than naïvely pooling. Sarcoidosis overlap is confined to the Huntley silica/pesticide/mould studies (Kucera, ACCESS/Newman).</p>
+  </div>
+  <div class="card">
+   <h3>Study × exposure incidence map</h3>
+   <p class="sub">Which studies feed which families. Rows with multiple marks are the shared studies inducing the dependence.</p>
+   <div class="controls"><div class="seg" id="segInc"><button class="on" data-v="ipf">IPF</button><button data-v="sar">Sarcoidosis</button></div></div>
+   <div id="incMap" style="overflow:auto"></div>
+  </div>
+ </section>
+</main>
+<div class="footer">Interactive results dashboard · generated from verified source data · offline / self-contained · Supplement S3, S5, Cross-Validation</div>
+
+<script>
+const TIERCOL={Robust:"#2F8F6B",Borderline:"#6FB07D",Fragile:"#E0A93B",Weak:"#C0553B",Null:"#9AA5A8"};
+const TIERRANK={Null:0,Weak:1,Fragile:2,Borderline:3,Robust:4}; // for min-tier filter mapping below
+const POOLS=[
+ {dis:"IPF",name:"Metal dust (occupational)",adj:"Smoking-adjusted",k:7,or:1.89,lo:1.25,hi:3.54,dl:1.88,reml:1.83,p:0.996,tier:"Robust"},
+ {dis:"IPF",name:"VGDF",adj:"Not adjusted",k:9,or:1.75,lo:1.20,hi:2.72,dl:1.75,reml:1.76,p:0.996,tier:"Robust"},
+ {dis:"IPF",name:"Silica",adj:"Not adjusted",k:10,or:1.60,lo:0.99,hi:2.86,dl:1.66,reml:1.61,p:0.972,tier:"Borderline"},
+ {dis:"IPF",name:"Metal dust (occupational)",adj:"Not adjusted",k:7,or:1.31,lo:0.97,hi:1.85,dl:1.30,reml:1.32,p:0.967,tier:"Borderline"},
+ {dis:"IPF",name:"Wood dust",adj:"Not adjusted",k:7,or:1.45,lo:0.96,hi:2.28,dl:1.43,reml:1.43,p:0.966,tier:"Borderline"},
+ {dis:"IPF",name:"Wood dust",adj:"Smoking-adjusted",k:6,or:1.46,lo:0.85,hi:2.80,dl:1.49,reml:1.46,p:0.929,tier:"Fragile"},
+ {dis:"IPF",name:"General dust",adj:"Not adjusted",k:4,or:1.23,lo:0.82,hi:1.75,dl:1.25,reml:1.25,p:0.899,tier:"Fragile"},
+ {dis:"IPF",name:"Pesticides",adj:"Smoking-adjusted",k:3,or:1.73,lo:0.60,hi:4.93,dl:1.74,reml:1.74,p:0.874,tier:"Fragile"},
+ {dis:"IPF",name:"General dust",adj:"Smoking-adjusted",k:3,or:1.58,lo:0.56,hi:6.14,dl:1.56,reml:1.73,p:0.867,tier:"Fragile"},
+ {dis:"IPF",name:"Air pollution",adj:"Smoking-adjusted",k:2,or:1.35,lo:0.39,hi:4.62,dl:1.35,reml:1.31,p:0.789,tier:"Weak"},
+ {dis:"IPF",name:"Solvents",adj:"Smoking-adjusted",k:3,or:1.11,lo:0.55,hi:2.25,dl:1.11,reml:1.11,p:0.657,tier:"Null"},
+ {dis:"Sarcoid",name:"Silica",adj:"Mixed",k:5,or:1.67,lo:0.99,hi:3.88,dl:1.73,reml:1.67,p:0.974,tier:"Borderline"},
+ {dis:"Sarcoid",name:"Pesticides",adj:"Mixed",k:3,or:1.44,lo:0.73,hi:3.05,dl:1.42,reml:1.42,p:0.916,tier:"Fragile"},
+ {dis:"Sarcoid",name:"Mould / mildew",adj:"Mixed",k:2,or:1.53,lo:0.58,hi:4.05,dl:1.52,reml:1.52,p:0.905,tier:"Fragile"}
+];
+const OVERALL=[
+ {lab:"IPF — all exposures (62 estimates)",or:1.52,lo:1.28,hi:1.84,che:1.42,chelo:1.20,chehi:1.67,p:">0.999",sig:true},
+ {lab:"Sarcoid — full consolidated set (n=14)",or:1.86,lo:1.21,hi:3.03,che:1.85,chelo:1.33,chehi:2.58,p:"0.994",sig:true},
+ {lab:"Sarcoid — Huntley-sourced (n=12)",or:1.89,lo:1.11,hi:3.47,che:null,p:"0.986",sig:true},
+ {lab:"Sarcoid — core pools only (n=10)",or:1.59,lo:0.89,hi:3.02,che:1.49,chelo:1.09,chehi:2.03,p:"0.959",sig:false}
+];
+const AM_DOM=["C2","C4","C7","C9","C11","C13","C15"];
+const AM_DOMFULL=["Protocol a priori","Comprehensive search","Excluded-studies list","RoB of studies","Meta-analytic methods","RoB in interpretation","Publication bias"];
+const OVR_COL={"Moderate":"#2F8F6B","Low":"#E0A93B","Critically Low":"#C0553B","High":"#1F7A4D"};
+const AMSTAR=[
+ ["Gandhi 2023","IPF SRMA (Annals ATS)",["Y","Y","Y","Y","Y","Y","Y"],"Moderate"],
+ ["Pauchet 2022","IPF SRMA (J Tox Env Health B)",["P","P","N","Y","Y","Y","Y"],"Low"],
+ ["Manna 2021","IPF SR, no pooling",["P","Y","N","Y","NA","Y","NA"],"Low"],
+ ["Lee 2025","ILD SRMA (Thorax)",["Y","P","Y","Y","Y","Y","N"],"Low"],
+ ["Huntley 2023","Sarcoid SRMA (Occup Environ Med)",["Y","Y","Y","Y","Y","P","N"],"Low"],
+ ["Park & Ahn 2021","IPF SRMA (Sci Rep)",["N","P","N","Y","Y","Y","P"],"Critically Low"],
+ ["Reynolds 2020","IPF narrative (Clin Chest Med)",["N","N","N","P","N","Y","P"],"Critically Low"],
+ ["Taskar 2006","IPF proceedings (Proc ATS)",["N","N","N","N","P","N","N"],"Critically Low"],
+ ["Rezai 2024","Sarcoid rapid review (Occup Med)",["N","P","N","Y","NA","Y","N"],"Critically Low"],
+ ["Wambui 2022","Sarcoid preprint (medRxiv)",["N","P","N","N","P","N","N"],"Critically Low"],
+ ["Blanc 2019","ATS/ERS statement (narrative)",["N","P","N","N","NA","N","N"],"Critically Low"]
+];
+const AM_CELL={"Y":"#2F8F6B","P":"#E0A93B","N":"#C0553B","NA":"#B7C0C2"};
+const AM_SYM={"Y":"+","P":"−","N":"×","NA":"·"};
+const OH_COL={"L":"#1B7837","PL":"#A6D96A","PH":"#F2A65A","H":"#C0392B","NI":"#BDBDBD"};
+const OHAT_IPF=[
+ ["Abramson 2020",["L","PL","L","L","L","L","L","L","PL","PL"],"Low"],["Andersson 2021",["L","PL","PL","PL","L","L","PL","L","L","L"],"Low"],
+ ["Awadalla 2012",["PL","PL","PL","PL","PL","L","PL","L","L","PL"],"Low"],["Baumgartner 2000",["PH","PH","PH","L","L","L","L","PH","L","L"],"Greater-than-low"],
+ ["Berge 2003",["PH","PH","PL","PH","PH","PL","PL","PL","PH","PH"],"Greater-than-low"],["Cui 2023",["PL","PL","PL","PL","L","L","L","PL","PL","PL"],"Low"],
+ ["Ekstrom 2014",["L","L","PL","L","PH","L","L","L","L","L"],"Low"],["Garcia-Sancho 2011",["PL","PL","PL","PL","PL","L","L","L","L","L"],"Low"],
+ ["Gustafson 2007",["L","PL","PL","PL","PL","L","L","L","L","PL"],"Low"],["Hubbard 1996",["PL","PL","PH","L","L","PH","PL","PH","L","PL"],"Greater-than-low"],
+ ["Hubbard 2000",["PH","PL","L","PL","PH","PH","L","PL","PL","L"],"Greater-than-low"],["Iwai 1994",["L","PH","PL","L","L","L","L","PL","PL","L"],"Greater-than-low"],
+ ["Johannson 2014",["PL","PL","L","PL","PL","L","L","PL","L","L"],"Low"],["Kitamura 2007",["PH","PH","PH","L","PL","PH","PL","PL","PL","PH"],"Greater-than-low"],
+ ["Koo 2017",["PL","L","L","L","PH","L","L","PL","L","L"],"Low"],["Miyake 2005",["PH","PL","L","PL","L","L","L","PL","PL","PL"],"Low"],
+ ["Mullen 1998",["PL","PL","L","PL","PL","PH","PL","L","L","L"],"Greater-than-low"],["Paolocci 2018",["L","PL","L","PL","PL","L","L","L","L","PL"],"Low"],
+ ["Park J 2020",["PH","PL","PL","PH","PH","L","L","PH","PL","L"],"Greater-than-low"],["Reynolds C 2019",["PH","PL","PL","PL","PL","H","L","PL","PL","L"],"Greater-than-low"],
+ ["Scott 1990",["PL","PL","PL","H","L","PH","PL","PH","L","PL"],"Greater-than-low"],["Wang 2023",["PL","PL","PL","PL","L","L","L","PL","PL","PL"],"Low"],
+ ["Zubairi 2023",["PL","PL","PL","L","L","L","L","PL","L","L"],"Low"]
+];
+const OHAT_SAR=[
+ ["Beijer 2020",["PL","PL","PL","L","PL","PH","PL","PL","L","PL"],"Greater-than-low"],["Kucera 2003",["PL","PH","PL","PL","PL","PL","PL","PL","L","PL"],"Greater-than-low"],
+ ["Graff 2020",["L","PL","PL","PL","L","PH","L","PL","L","PL"],"Greater-than-low"],["Jonsson 2019",["L","PL","PL","PL","L","L","L","PL","PL","PL"],"Low"],
+ ["Rafnsson 1998",["PL","PL","PL","PL","PL","PH","PL","PL","NI","PH"],"Greater-than-low"],["Kajdasz 2001",["PL","PH","PL","PL","PL","PL","PL","PL","PL","PL"],"Greater-than-low"],
+ ["ACCESS/Newman 2004",["PL","PH","PL","L","PL","PL","PL","PL","L","PL"],"Greater-than-low"],["Vihlborg 2017",["PL","L","PL","PL","PL","PH","PL","PL","L","PH"],"Greater-than-low"],
+ ["Catinon 2018",["PH","PH","PH","PL","PH","PH","PH","PH","PL","H"],"Greater-than-low"],["Levin 2023",["PL","PH","PL","PL","PL","PL","PL","PL","L","PL"],"Greater-than-low"]
+];
+const XVAL=[
+ ["IPF Metal dust (adj)",7,1.89,1.90,1.003,1.88,1.88,"2.67†","1.83",true],
+ ["IPF VGDF (unadj)",9,1.75,1.75,1.004,1.75,1.75,"1.92†","1.76",true],
+ ["IPF Silica (unadj)",10,1.60,1.60,1.001,1.66,1.66,"1.98†","1.61",true],
+ ["IPF Wood dust (unadj)",7,1.45,1.45,1.001,1.43,1.43,"1.43","1.43",false],
+ ["Sarcoid Silica",5,1.67,1.67,1.001,1.73,1.73,"1.67","1.67",false],
+ ["Sarcoid Pesticides",3,1.44,1.42,1.009,1.42,1.42,"1.42","1.42",false],
+ ["Sarcoid Mould/Mildew",2,1.53,1.53,1.005,1.52,1.52,"1.52","1.52",false]
+];
+const DEPDATA={"ipf": {"families": ["Metal dust", "Silica", "VGDF", "Wood dust", "General dust", "Air poll.", "Pesticides", "Solvents"], "shared": [[14, 9, 6, 11, 5, 0, 3, 3], [9, 11, 6, 9, 4, 0, 3, 3], [6, 6, 9, 7, 3, 0, 0, 1], [11, 9, 7, 13, 5, 0, 2, 3], [5, 4, 3, 5, 7, 0, 1, 1], [0, 0, 0, 0, 0, 3, 0, 0], [3, 3, 0, 2, 1, 0, 3, 2], [3, 3, 1, 3, 1, 0, 2, 3]], "studies": ["Abramson 2020", "Andersson 2021", "Awadalla 2012", "Baumgartner 2000", "Cui Feipeng 2023", "Ekstrom 2014", "Garcia-Sancho 2011", "Gustafson 2007", "Hubbard 1996", "Hubbard 2000", "Iwai 1994", "Johannson 2014", "Kitamura Hideya 2007", "Koo 2017", "Miyake 2005", "Mullen 1998", "Paolocci 2018", "Park J 2020", "Reynolds C 2019", "Scott 1990", "Wang Xiaojie 2023", "Zubairi 2023"], "incidence": [[1, 1, 1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0], [1, 1, 0, 1, 0, 0, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1], [0, 0, 0, 0, 0, 1, 0, 0], [1, 0, 0, 1, 1, 0, 0, 0], [0, 0, 1, 0, 1, 0, 0, 0], [1, 1, 1, 1, 1, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 0, 0, 1, 0, 1, 0], [0, 1, 1, 1, 0, 0, 0, 0], [1, 0, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 0, 1, 1, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0]]}, "sar": {"families": ["Silica", "Pesticides", "Mould", "WTC part.", "Metal(Al)"], "shared": [[6, 1, 1, 0, 0], [1, 3, 2, 0, 0], [1, 2, 2, 0, 0], [0, 0, 0, 1, 0], [0, 0, 0, 0, 1]], "studies": ["ACCESS/Newman 2004", "Beijer 2020", "Graff 2020", "Jonsson 2019", "Jordan 2011", "Kajdasz 2001", "Kucera 2003", "Levin 2023", "Rafnsson 1998", "Vihlborg 2017"], "incidence": [[0, 1, 1, 0, 0], [1, 0, 0, 0, 0], [1, 0, 0, 0, 0], [1, 0, 0, 0, 0], [0, 0, 0, 1, 0], [0, 1, 0, 0, 0], [1, 1, 1, 0, 0], [0, 0, 0, 0, 1], [1, 0, 0, 0, 0], [1, 0, 0, 0, 0]]}}; const DEP=DEPDATA;
+
+// ---------- helpers ----------
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+function tierBadge(t){return `<span class="tier" style="background:${TIERCOL[t]}">${t}</span>`;}
+// log-scale forest
+function forest(container,rows,opts={}){
+ const showRef=opts.showRef, W=container.clientWidth||860, rowH=34, padL=Math.min(300,Math.max(190,W*0.30)),
+   padR=70, top=26, H=top+rows.length*rowH+18;
+ const xmin=Math.log(0.3), xmax=Math.log(7);
+ const X=v=>padL+ (Math.log(Math.max(0.05,v))-xmin)/(xmax-xmin)*(W-padL-padR);
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">`;
+ // ticks
+ [0.5,1,2,4,6].forEach(t=>{const x=X(t);s+=`<line x1="${x}" y1="${top-6}" x2="${x}" y2="${H-14}" stroke="${t===1?'#9aa5a8':'#EAF0F1'}" stroke-width="${t===1?1.4:1}" ${t===1?'stroke-dasharray="4 4"':''}/>`;
+  s+=`<text x="${x}" y="${H-3}" font-size="10.5" fill="#5F6E72" text-anchor="middle">${t}</text>`;});
+ rows.forEach((r,i)=>{
+  const y=top+i*rowH+rowH/2;
+  s+=`<text x="${padL-10}" y="${y-3}" font-size="12" fill="#0E3540" text-anchor="end" font-weight="600">${r.name}</text>`;
+  s+=`<text x="${padL-10}" y="${y+10}" font-size="10" fill="#5F6E72" text-anchor="end">${r.dis} · ${r.adj} · k=${r.k}</text>`;
+  s+=`<line x1="${X(r.lo)}" y1="${y}" x2="${X(r.hi)}" y2="${y}" stroke="${TIERCOL[r.tier]}" stroke-width="2.4"/>`;
+  s+=`<line x1="${X(r.lo)}" y1="${y-5}" x2="${X(r.lo)}" y2="${y+5}" stroke="${TIERCOL[r.tier]}" stroke-width="2.4"/>`;
+  s+=`<line x1="${X(r.hi)}" y1="${y-5}" x2="${X(r.hi)}" y2="${y+5}" stroke="${TIERCOL[r.tier]}" stroke-width="2.4"/>`;
+  if(showRef){s+=`<path d="M ${X(r.dl)} ${y-6} L ${X(r.dl)+6} ${y} L ${X(r.dl)} ${y+6} L ${X(r.dl)-6} ${y} Z" fill="#0E4C5A" opacity="0.85"/>`;
+   s+=`<path d="M ${X(r.reml)} ${y-6} L ${X(r.reml)+6} ${y+6} L ${X(r.reml)-6} ${y+6} Z" fill="#2E8B9E" opacity="0.9"/>`;}
+  s+=`<circle cx="${X(r.or)}" cy="${y}" r="6.5" fill="${TIERCOL[r.tier]}" stroke="#fff" stroke-width="1.5"/>`;
+  s+=`<text x="${X(r.hi)+8}" y="${y+4}" font-size="11" fill="#0E3540" font-weight="600">${r.or.toFixed(2)} (${r.lo.toFixed(2)}–${r.hi.toFixed(2)})</text>`;
+ });
+ s+=`</svg>`; container.innerHTML=s;
+}
+// ---------- POOLS ----------
+let disFilter="all", tierMin=0, showRef=true;
+function renderPools(){
+ let rows=POOLS.filter(r=>disFilter==="all"||r.dis===disFilter);
+ const minmap={0:0,1:2,2:3,3:4}; rows=rows.filter(r=>TIERRANK[r.tier]>=minmap[tierMin]);
+ rows=rows.slice().sort((a,b)=>b.p-a.p);
+ forest($("#forest"),rows,{showRef});
+ // table
+ let t=`<tr><th class="l">Exposure</th><th>Disease</th><th>Adj.</th><th>k</th><th>Bayes OR (95% CrI)</th><th>DL</th><th>REML</th><th>P(OR&gt;1)</th><th>Tier</th></tr>`;
+ rows.forEach(r=>{t+=`<tr><td class="l">${r.name}</td><td>${r.dis}</td><td>${r.adj}</td><td>${r.k}</td>
+  <td><b>${r.or.toFixed(2)}</b> (${r.lo.toFixed(2)}–${r.hi.toFixed(2)})</td><td>${r.dl.toFixed(2)}</td><td>${r.reml.toFixed(2)}</td>
+  <td>${r.p.toFixed(3)}</td><td>${tierBadge(r.tier)}</td></tr>`;});
+ $("#poolTbl").innerHTML=t;
+}
+$("#segDis").addEventListener("click",e=>{if(e.target.dataset.v){[...e.currentTarget.children].forEach(b=>b.classList.remove("on"));e.target.classList.add("on");disFilter=e.target.dataset.v;renderPools();}});
+$("#selTier").addEventListener("change",e=>{tierMin=+e.target.value;renderPools();});
+$("#chkRef").addEventListener("change",e=>{showRef=e.target.checked;renderPools();});
+// ---------- OVERALL ----------
+function renderOverall(){
+ let k="";
+ OVERALL.forEach(o=>{k+=`<div class="kpi"><div class="k">${o.lab}</div><div class="v">${o.or.toFixed(2)}</div>
+  <div class="c">95% CrI ${o.lo.toFixed(2)}–${o.hi.toFixed(2)} · P(OR&gt;1) ${o.p}${o.che?` · CHE ${o.che.toFixed(2)}`:""}</div></div>`;});
+ $("#kpiOverall").innerHTML=k;
+ const rows=OVERALL.map(o=>({name:o.lab,dis:o.sig?"excludes null":"crosses null",adj:o.che?`CHE ${o.che.toFixed(2)}`:"—",k:"",or:o.or,lo:o.lo,hi:o.hi,dl:o.or,reml:o.or,tier:o.sig?"Robust":"Fragile"}));
+ forest($("#forestOverall"),rows,{showRef:false});
+}
+// ---------- AMSTAR ----------
+function renderAmstar(){
+ let t=`<table class="tl"><tr><th class="rowlab"></th>`;
+ AM_DOM.forEach((d,i)=>t+=`<th title="${AM_DOMFULL[i]}">${d}</th>`);
+ t+=`<th>Overall</th></tr>`;
+ AMSTAR.forEach(r=>{t+=`<tr><td class="rowlab">${r[0]}<div class="rowsub">${r[1]}</div></td>`;
+  r[2].forEach(v=>t+=`<td><div class="cell" style="background:${AM_CELL[v]}">${AM_SYM[v]}</div></td>`);
+  t+=`<td><div class="cell" style="background:${OVR_COL[r[3]]};width:auto;padding:0 9px;white-space:nowrap">${r[3]}</div></td></tr>`;});
+ t+=`</table>`; $("#amstar").innerHTML=t;
+}
+// ---------- OHAT ----------
+let ohFilter="all";
+function renderOhat(){
+ let data=[]; if(ohFilter!=="Sarcoid")data=data.concat(OHAT_IPF.map(r=>["IPF",...r]));
+ if(ohFilter!=="IPF")data=data.concat(OHAT_SAR.map(r=>["Sarcoid",...r]));
+ let t=`<table class="tl"><tr><th class="rowlab"></th>`;
+ for(let i=1;i<=10;i++)t+=`<th>D${i}${[2,4,6].includes(i)?"*":""}</th>`;
+ t+=`<th>Overall</th></tr>`;
+ data.forEach(r=>{const ov=r[3]; t+=`<tr><td class="rowlab">${r[1]}<div class="rowsub">${r[0]}</div></td>`;
+  r[2].forEach(v=>t+=`<td><div class="cell" style="background:${OH_COL[v]};color:${v==='PL'||v==='PH'?'#123':'#fff'}">${v}</div></td>`);
+  const oc=ov==="Low"?"#1B7837":"#F2A65A"; t+=`<td><div class="cell" style="background:${oc};width:auto;padding:0 8px;white-space:nowrap">${ov}</div></td></tr>`;});
+ t+=`</table>`; $("#ohat").innerHTML=t;
+}
+$("#segOh").addEventListener("click",e=>{if(e.target.dataset.v){[...e.currentTarget.children].forEach(b=>b.classList.remove("on"));e.target.classList.add("on");ohFilter=e.target.dataset.v;renderOhat();}});
+// ---------- XVAL ----------
+function renderXval(){
+ let t=`<tr><th class="l">Pool</th><th>k</th><th>Reported Bayes</th><th>PyMC (NUTS)</th><th>R̂</th><th>Reported DL</th><th>metafor DL</th><th>Reported REML</th><th>Corrected REML</th></tr>`;
+ XVAL.forEach(r=>{t+=`<tr><td class="l">${r[0]}</td><td>${r[1]}</td><td>${r[2].toFixed(2)}</td><td><b>${r[3].toFixed(2)}</b></td><td>${r[4].toFixed(3)}</td>
+  <td>${r[5].toFixed(2)}</td><td>${r[6].toFixed(2)}</td><td>${r[7]}</td><td><b>${r[8]}</b>${r[9]?' ✎':''}</td></tr>`;});
+ $("#xvalTbl").innerHTML=t;
+ // delta bars
+ const W=$("#xvalBars").clientWidth||820, rh=26, H=XVAL.length*rh+30, mid=W*0.62, scale=900;
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"><text x="4" y="12" font-size="11" fill="#5F6E72">|Δ| engine vs PyMC (×100, capped)</text>`;
+ s+=`<line x1="${mid}" y1="20" x2="${mid}" y2="${H-6}" stroke="#9aa5a8" stroke-dasharray="3 3"/>`;
+ XVAL.forEach((r,i)=>{const y=24+i*rh, d=Math.abs(r[2]-r[3]);
+  s+=`<text x="${mid-8}" y="${y+13}" font-size="10.5" fill="#0E3540" text-anchor="end">${r[0]}</text>`;
+  s+=`<rect x="${mid}" y="${y+4}" width="${Math.max(2,d*scale)}" height="12" rx="3" fill="${d<=0.02?'#2F8F6B':'#E0A93B'}"/>`;
+  s+=`<text x="${mid+Math.max(2,d*scale)+6}" y="${y+13}" font-size="10" fill="#5F6E72">Δ=${d.toFixed(2)} · R̂ ${r[4].toFixed(3)}</text>`;});
+ s+=`</svg>`; $("#xvalBars").innerHTML=s;
+}
+// ---------- CORR ----------
+function heat(container,fams,M){
+ const n=fams.length, mx=Math.max(...M.flat());
+ let t=`<table class="hm"><tr><th></th>`; fams.forEach(f=>t+=`<th>${f}</th>`); t+=`</tr>`;
+ for(let i=0;i<n;i++){t+=`<tr><td class="rl">${fams[i]}</td>`;
+  for(let j=0;j<n;j++){const v=M[i][j], diag=i===j;
+   const a= mx? v/mx :0; const bg= diag? "#0E4C5A" : `rgba(46,139,158,${0.12+a*0.85})`;
+   t+=`<td class="v" style="background:${bg};color:${(diag||a>0.55)?'#fff':'#0E3540'}">${v||""}</td>`;}
+  t+=`</tr>`;}
+ t+=`</table>`; container.innerHTML=t;
+}
+function renderCorr(){heat($("#corrIPF"),DEP.ipf.families,DEP.ipf.shared);heat($("#corrSar"),DEP.sar.families,DEP.sar.shared);renderInc("ipf");}
+let incWhich="ipf";
+function renderInc(which){incWhich=which;const D=DEP[which];
+ let t=`<table class="hm"><tr><th class="rl">Study</th>`; D.families.forEach(f=>t+=`<th>${f}</th>`); t+=`</tr>`;
+ D.studies.forEach((st,i)=>{const cnt=D.incidence[i].reduce((a,b)=>a+b,0);
+  t+=`<tr><td class="rl">${st}${cnt>1?` <span class="pill" style="padding:0 6px">${cnt}</span>`:""}</td>`;
+  D.incidence[i].forEach(v=>t+=`<td class="v" style="background:${v?'#2E8B9E':'#EEF4F5'};color:#fff">${v?'●':''}</td>`);
+  t+=`</tr>`;});
+ t+=`</table>`; $("#incMap").innerHTML=t;}
+$("#segInc").addEventListener("click",e=>{if(e.target.dataset.v){[...e.currentTarget.children].forEach(b=>b.classList.remove("on"));e.target.classList.add("on");renderInc(e.target.dataset.v);}});
+// ---------- NAV ----------
+const TABS=[["pools","Exposure pools"],["overall","Overall & CHE"],["rob","Risk of bias"],["xval","Cross-validation"],["corr","Correlation matrices"]];
+const nav=$("#nav");
+TABS.forEach((t,i)=>{const b=el("button",i===0?"active":"",t[1]);b.dataset.t=t[0];
+ b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.dataset.p===t[0]));
+  if(t[0]==="pools")renderPools(); if(t[0]==="overall")renderOverall(); if(t[0]==="xval")renderXval(); if(t[0]==="corr")renderCorr();};
+ nav.appendChild(b);});
+// initial
+renderPools();renderAmstar();renderOhat();
+window.addEventListener("resize",()=>{const a=document.querySelector("nav button.active").dataset.t;
+ if(a==="pools")renderPools();if(a==="overall")renderOverall();if(a==="xval")renderXval();});
+</script>
+</body>
+</html>
